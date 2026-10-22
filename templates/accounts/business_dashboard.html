@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load worklink %}
+{% block content %}
+<h1 class="h4">{{ business.business_name }}</h1>
+<div class="row g-3 mb-3">
+  <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Verification</div>
+    <span class="badge {{ business.verification_status|badge }}">{{ business.get_verification_status_display }}</span>
+    {% if not business.is_verified %}<div class="mt-2"><a href="{% url 'verification' %}">Submit / check</a></div>{% endif %}</div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Active jobs</div><strong class="fs-4">{{ active_jobs }}</strong></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Applicants</div><strong class="fs-4">{{ applicant_count }}</strong></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Reputation</div><strong>{{ business.reputation }}</strong></div></div></div>
+</div>
+<a class="btn btn-primary mb-3" href="{% url 'job_create' %}">Post a job</a>
+<a class="btn btn-outline-secondary mb-3" href="{% url 'my_jobs' %}">Manage jobs</a>
+<h2 class="h5">Placements and fees</h2>
+<div class="table-responsive"><table class="table table-sm bg-white">
+  <thead><tr><th>Worker</th><th>Job</th><th>Joined</th><th>Status</th><th>Fee</th><th></th></tr></thead>
+  <tbody>
+  {% for p in placements %}
+    <tr><td>{{ p.application.worker.display_name }}</td><td>{{ p.application.job.title }}</td><td>{{ p.joined_at }}</td>
+      <td><span class="badge {{ p.status|badge }}">{{ p.get_status_display }}</span></td>
+      <td>{% if p.fee %}<span class="badge {{ p.fee.status|badge }}">{{ p.fee.get_status_display }}</span>{% else %}-{% endif %}</td>
+      <td><a href="{% url 'application_detail' p.application.pk %}">Open</a></td></tr>
+  {% empty %}<tr><td colspan="6" class="text-muted">No placements yet.</td></tr>{% endfor %}
+  </tbody></table></div>
+<p class="small text-muted">Fee tracking is for record-keeping only; WorkLink doesn't process payments in this version.</p>
+{% endblock %}

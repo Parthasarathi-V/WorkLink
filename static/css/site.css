@@ -1,0 +1,8 @@
+body { background: #f7f8fa; }
+.navbar-brand { font-weight: 700; letter-spacing: .3px; }
+.card { border: 0; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.match-badge { font-size: .8rem; }
+.timeline li { margin-bottom: .35rem; }
+.chat-msg { padding: .5rem .75rem; border-radius: .5rem; background: #eef1f5; margin-bottom: .5rem; }
+.chat-msg.mine { background: #dbeafe; }
+footer { color: #6b7280; font-size: .85rem; }

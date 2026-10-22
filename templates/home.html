@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="p-5 mb-4 bg-white rounded-3 shadow-sm">
+  <h1 class="display-6 fw-bold">Verified part-time work, close to you.</h1>
+  <p class="lead">WorkLink connects verified students and local workers with verified nearby businesses for part-time, temporary and short-term jobs, with the whole hiring process tracked in one place.</p>
+  <a class="btn btn-primary btn-lg me-2" href="{% url 'job_list' %}">Browse {{ open_jobs }} open job{{ open_jobs|pluralize }}</a>
+  {% if not user.is_authenticated %}<a class="btn btn-outline-primary btn-lg" href="{% url 'register' %}">Create an account</a>{% endif %}
+</div>
+<div class="row g-3">
+  <div class="col-md-4"><div class="card h-100"><div class="card-body"><h2 class="h5">Verified profiles</h2>
+    <p>Workers and businesses submit proof that WorkLink coordinators review manually before they can apply or post.</p></div></div></div>
+  <div class="col-md-4"><div class="card h-100"><div class="card-body"><h2 class="h5">Private by default</h2>
+    <p>Phone numbers stay hidden during recruitment. Talk through WorkLink, and a coordinator can help arrange contact.</p></div></div></div>
+  <div class="col-md-4"><div class="card h-100"><div class="card-body"><h2 class="h5">Clear hiring steps</h2>
+    <p>Apply, shortlist, interview, select, accept, then confirm joining. Every step is recorded.</p></div></div></div>
+</div>
+<p class="text-muted mt-4 small">Verification reduces risk but cannot guarantee anyone's identity or honesty. Always use judgement and report concerns.</p>
+{% endblock %}

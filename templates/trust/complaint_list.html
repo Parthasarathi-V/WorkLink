@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load worklink %}
+{% block content %}
+<h1 class="h4">Complaints</h1>
+<p class="text-muted small">A complaint is an allegation. WorkLink reviews evidence and both sides' accounts before any decision.</p>
+{% for c in complaints %}
+  <a class="card mb-2 text-decoration-none text-reset" href="{% url 'complaint_detail' c.pk %}"><div class="card-body py-2">
+    #{{ c.pk }} · {{ c.get_category_display }} · {% if c.complainant_id == user.id %}filed by you{% else %}filed against you{% endif %}
+    <span class="badge {{ c.status|badge }}">{{ c.get_status_display }}</span></div></a>
+{% empty %}<p class="text-muted">No complaints.</p>{% endfor %}
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load worklink %}
+{% block content %}
+<h1 class="h4">Hi, {{ worker.display_name }}</h1>
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="card"><div class="card-body">
+    <div class="text-muted small">Verification</div>
+    <span class="badge {{ worker.verification_status|badge }}">{{ worker.get_verification_status_display }}</span>
+    {% if not worker.is_verified %}<div class="mt-2"><a href="{% url 'verification' %}">Submit / check verification</a></div>{% endif %}
+  </div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body">
+    <div class="text-muted small">Profile completeness</div>
+    <div class="progress mt-1"><div class="progress-bar" style="width: {% widthratio worker.completeness 1 100 %}%"></div></div>
+    <a href="{% url 'profile' %}">Edit profile</a>
+  </div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body">
+    <div class="text-muted small">Reputation</div><strong>{{ worker.reputation }}</strong>
+  </div></div></div>
+</div>
+<h2 class="h5">Jobs that fit you</h2>
+{% for j in recommended %}
+  <div class="card mb-2"><div class="card-body d-flex justify-content-between align-items-start">
+    <div><a class="fw-semibold" href="{% url 'job_detail' j.pk %}">{{ j.title }}</a>
+      <div class="small text-muted">{{ j.business.business_name }} · {{ j.area }} · {{ j.pay_display }}</div>
+      <div class="small">{{ j.match.reasons|join:" · " }}</div></div>
+    <span class="badge text-bg-primary match-badge">{{ j.match.score }}% match</span>
+  </div></div>
+{% empty %}<p class="text-muted">No open jobs right now.</p>{% endfor %}
+<p class="small text-muted">Match scores are simple rules (skills, area, availability, job type), not AI. Complete your profile for better results.</p>
+<h2 class="h5 mt-4">Recent applications</h2>
+{% for a in apps %}
+  <div class="card mb-2"><div class="card-body py-2">
+    <a href="{% url 'application_detail' a.pk %}">{{ a.job.title }}</a> · {{ a.job.business.business_name }}
+    <span class="badge {{ a.status|badge }}">{{ a.get_status_display }}</span></div></div>
+{% empty %}<p class="text-muted">You haven't applied to anything yet.</p>{% endfor %}
+{% endblock %}

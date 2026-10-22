@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Notifications</h1>
+  <form method="post" action="{% url 'notification_read_all' %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary">Mark all read</button></form>
+</div>
+{% for n in page %}
+  <a href="{% url 'notification_open' n.pk %}" class="card mb-2 text-decoration-none text-reset"><div class="card-body py-2">
+    <strong>{{ n.title }}</strong>{% if not n.is_read %} <span class="badge text-bg-primary">new</span>{% endif %}
+    <div class="small text-muted">{{ n.message }} · {{ n.created_at|date:"d M, H:i" }}</div></div></a>
+{% empty %}<p class="text-muted">Nothing here yet.</p>{% endfor %}
+{% if page.has_other_pages %}
+<nav><ul class="pagination">
+  {% if page.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a></li>{% endif %}
+  <li class="page-item disabled"><span class="page-link">{{ page.number }} / {{ page.paginator.num_pages }}</span></li>
+  {% if page.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}">Next</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}
