@@ -8,7 +8,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --- Security: override via environment variables outside local development ---
 SECRET_KEY = os.environ.get("WORKLINK_SECRET_KEY", "dev-only-insecure-key-change-me")
 DEBUG = os.environ.get("WORKLINK_DEBUG", "1") == "1"
-ALLOWED_HOSTS = os.environ.get("WORKLINK_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = [
+    "worklink-2.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
