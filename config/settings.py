@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- Security: override via environment variables outside local development ---
 SECRET_KEY = os.environ.get("WORKLINK_SECRET_KEY", "dev-only-insecure-key-change-me")
-DEBUG = os.environ.get("WORKLINK_DEBUG", "1") == "1"
+DEBUG = False
 ALLOWED_HOSTS = [
     "worklink-2.onrender.com",
     "localhost",
