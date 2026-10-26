@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load worklink %}
+{% block title %}Application · WorkLink{% endblock %}
+{% block content %}
+<div class="row g-3">
+<div class="col-lg-7">
+  <div class="card mb-3"><div class="card-body">
+    <h1 class="h5">{{ app.job.title }}</h1>
+    <p class="mb-1">Worker: <strong>{{ app.worker.display_name }}</strong> · Business: <strong>{{ app.job.business.business_name }}</strong></p>
+    <p>Status: <span class="badge {{ app.status|badge }}">{{ app.get_status_display }}</span></p>
+    {% if app.cover_note %}<p class="fst-italic">"{{ app.cover_note }}"</p>{% endif %}
+
+    {% if actions %}
+      <form method="post" action="{% url 'application_status' app.pk %}" class="border rounded p-2 mb-2">{% csrf_token %}
+        <input class="form-control form-control-sm mb-2" name="reason" maxlength="300" placeholder="Optional note / reason">
+        <div class="d-flex flex-wrap gap-1">
+          {% for value, label in actions %}
+            <button name="new_status" value="{{ value }}" class="btn btn-sm {% if value == 'REJECTED' or value == 'DECLINED' or value == 'WITHDRAWN' %}btn-outline-danger{% else %}btn-primary{% endif %}">{{ label }}</button>
+          {% endfor %}
+        </div>
+      </form>
+    {% endif %}
+
+    {% if role == 'admin' %}
+      <p class="small text-muted">Admins: use the Django admin for placements and fees. Status overrides require an audited reason.</p>
+      <form method="post" action="{% url 'application_status' app.pk %}" class="d-flex gap-1">{% csrf_token %}
+        <select name="new_status" class="form-select form-select-sm w-auto">
+          {% for v, l in app.Status.choices %}<option value="{{ v }}">{{ l }}</option>{% endfor %}
+        </select>
+        <input class="form-control form-control-sm" name="reason" placeholder="Required reason" required>
+        <button class="btn btn-sm btn-warning">Override</button>
+      </form>
+    {% endif %}
+
+    {% if can_confirm_joining %}
+      <form method="post" action="{% url 'application_joined' app.pk %}" class="border rounded p-2 mt-2">{% csrf_token %}
+        <label class="form-label small mb-1" for="joined_at">The worker has started work. Joining date:</label>
+        <div class="d-flex gap-2">
+          <input type="date" id="joined_at" name="joined_at" value="{{ today|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}" class="form-control form-control-sm w-auto" required>
+          <button class="btn btn-sm btn-success">Confirm joining</button>
+        </div>
+        <div class="form-text">Both sides must confirm. Selection or acceptance alone is not joining.</div>
+      </form>
+    {% endif %}
+    {% if placement %}
+      <div class="alert alert-light border mt-2 mb-0 small">
+        Joining: <span class="badge {{ placement.status|badge }}">{{ placement.get_status_display }}</span>
+        on {{ placement.joined_at }} · worker {% if placement.confirmed_by_worker %}✔{% else %}…{% endif %} · business {% if placement.confirmed_by_business %}✔{% else %}…{% endif %}
+        {% if placement.status == 'CONFIRMED' %}<br>Protection window ends {{ placement.protection_ends }}.{% endif %}
+        {% if placement.fee and role != 'worker' %}<br>Fee record: <span class="badge {{ placement.fee.status|badge }}">{{ placement.fee.get_status_display }}</span>{% endif %}
+      </div>
+    {% endif %}
+    {% if can_dispute %}
+      <form method="post" action="{% url 'application_dispute' app.pk %}" class="d-flex gap-2 mt-2">{% csrf_token %}
+        <input class="form-control form-control-sm" name="reason" placeholder="Dispute the joining record? Explain why" required>
+        <button class="btn btn-sm btn-outline-danger">Dispute</button></form>
+    {% endif %}
+    {% if can_open_case %}
+      <form method="post" action="{% url 'application_protection' app.pk %}" class="border rounded p-2 mt-2">{% csrf_token %}
+        <label class="form-label small mb-1">Worker left within the protection window? Open a case for admin review:</label>
+        <textarea name="reason" class="form-control form-control-sm mb-1" rows="2" required></textarea>
+        <button class="btn btn-sm btn-outline-warning">Open protection case</button>
+        <div class="form-text">No refund or replacement happens automatically. A coordinator reviews the facts.</div>
+      </form>
+    {% endif %}
+    {% if case %}<div class="alert alert-warning mt-2 mb-0 small">Protection case: <span class="badge {{ case.status|badge }}">{{ case.get_status_display }}</span>
+      {% if case.decision %}<br>Decision: {{ case.decision }}{% endif %}</div>{% endif %}
+
+    <div class="mt-3 d-flex gap-2 flex-wrap">
+      {% if role != 'admin' %}<a class="btn btn-sm btn-outline-secondary" href="{% url 'complaint_create' app.pk %}">Raise a complaint</a>{% endif %}
+      {% if can_review %}<a class="btn btn-sm btn-outline-primary" href="{% url 'review_create' placement.pk %}">Leave a review</a>{% endif %}
+      {% if role == 'business' %}<a class="btn btn-sm btn-link" href="{% url 'job_applicants' app.job.pk %}">All applicants</a>{% endif %}
+    </div>
+  </div></div>
+
+  <div class="card"><div class="card-body">
+    <h2 class="h6">Messages</h2>
+    {% for m in app.messages.all %}
+      <div class="chat-msg {% if m.sender_id == user.id %}mine{% endif %}"><div class="small text-muted">
+        {% if m.sender.is_staff %}WorkLink coordinator{% elif m.sender_id == user.id %}You{% else %}Other party{% endif %} · {{ m.created_at|date:"d M, H:i" }}</div>{{ m.body }}</div>
+    {% empty %}<p class="text-muted small">No messages yet.</p>{% endfor %}
+    <form method="post" action="{% url 'application_message' app.pk %}">{% csrf_token %}
+      <textarea name="body" class="form-control mb-2" rows="2" maxlength="1000" placeholder="Write a message…" required></textarea>
+      <button class="btn btn-sm btn-primary">Send</button>
+      <span class="small text-muted ms-2">Phone numbers and emails are blocked; a coordinator can arrange contact.</span>
+    </form>
+  </div></div>
+</div>
+<div class="col-lg-5"><div class="card"><div class="card-body">
+  <h2 class="h6">Status history</h2>
+  <ul class="timeline list-unstyled small mb-0">
+    {% for h in app.history.all %}
+      <li><span class="badge {{ h.to_status|badge }}">{{ h.to_status }}</span> {{ h.changed_at|date:"d M Y, H:i" }}{% if h.reason %} · {{ h.reason }}{% endif %}</li>
+    {% endfor %}
+  </ul>
+</div></div></div>
+</div>
+{% endblock %}

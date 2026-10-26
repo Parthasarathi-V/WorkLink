@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-7"><div class="card"><div class="card-body">
+  <h1 class="h4">Draft a job with AI</h1>
+  <p class="text-muted">Describe the job in your own words (any style). A free local AI turns it into a structured draft that you review before saving. Don't include phone numbers.</p>
+  <form method="post">{% csrf_token %}
+    <textarea name="rough" class="form-control mb-3" rows="6" maxlength="1500" required
+      placeholder="e.g. Need someone for weekend evenings at my cafe to handle billing and serve customers, Indiranagar"></textarea>
+    <button class="btn btn-primary">Create draft</button>
+    <a class="btn btn-link" href="{% url 'job_create' %}">Skip, fill manually</a>
+  </form>
+</div></div></div></div>
+{% endblock %}

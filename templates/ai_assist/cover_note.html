@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-7"><div class="card"><div class="card-body">
+  <h1 class="h4">Application note for {{ job.title }}</h1>
+  <p class="text-muted small">{% if used_ai %}AI-written suggestion based on your profile.{% else %}Template note (AI is off or unavailable).{% endif %} Edit it so it sounds like you.</p>
+  <form method="post" action="{% url 'apply' job.pk %}">{% csrf_token %}
+    <textarea name="cover_note" class="form-control mb-3" rows="5" maxlength="1000">{{ note }}</textarea>
+    <button class="btn btn-primary">Send application</button>
+    <a class="btn btn-link" href="{% url 'job_detail' job.pk %}">Back</a>
+  </form>
+</div></div></div></div>
+{% endblock %}

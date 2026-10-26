@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load worklink %}
+{% block content %}
+<h1 class="h4">Applicants: {{ job.title }}</h1>
+<p class="text-muted small">Only matching-relevant details are shown. Contact details stay private; use messages or ask a WorkLink coordinator.</p>
+{% for a in apps %}
+  <div class="card mb-2"><div class="card-body d-flex justify-content-between flex-wrap gap-2">
+    <div><a class="fw-semibold" href="{% url 'application_detail' a.pk %}">{{ a.worker.display_name }}</a>
+      <span class="badge {{ a.status|badge }}">{{ a.get_status_display }}</span>
+      <div class="small text-muted">{{ a.worker.education|default:"Education not set" }} · {{ a.worker.preferred_area|default:"Area not set" }} · Reputation: {{ a.worker.reputation }}</div>
+      <div class="small">Skills: {{ a.worker.skills|default:"-" }} · Availability: {{ a.worker.availability|default:"-" }}</div>
+      {% if a.cover_note %}<div class="small fst-italic">"{{ a.cover_note }}"</div>{% endif %}</div>
+    <span class="badge text-bg-primary match-badge align-self-start">{{ a.match.score }}% match</span>
+  </div></div>
+{% empty %}<p class="text-muted">No applicants yet.</p>{% endfor %}
+<a href="{% url 'my_jobs' %}">&larr; Back to my jobs</a>
+{% endblock %}

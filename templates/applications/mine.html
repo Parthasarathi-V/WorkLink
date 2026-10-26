@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load worklink %}
+{% block content %}
+<h1 class="h4">My applications</h1>
+{% for a in apps %}
+  <div class="card mb-2"><div class="card-body d-flex justify-content-between">
+    <div><a class="fw-semibold" href="{% url 'application_detail' a.pk %}">{{ a.job.title }}</a>
+      <div class="small text-muted">{{ a.job.business.business_name }} · applied {{ a.applied_at|date:"d M Y" }}</div></div>
+    <span class="badge {{ a.status|badge }} align-self-start">{{ a.get_status_display }}</span>
+  </div></div>
+{% empty %}<p class="text-muted">No applications yet. <a href="{% url 'job_list' %}">Browse jobs</a>.</p>{% endfor %}
+{% endblock %}

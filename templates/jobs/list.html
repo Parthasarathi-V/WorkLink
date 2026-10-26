@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load worklink %}
+{% block title %}Jobs · WorkLink{% endblock %}
+{% block content %}
+<h1 class="h4">Open jobs</h1>
+<form method="get" class="card card-body mb-3"><div class="row g-2">
+  {% for f in form %}
+    <div class="col-6 col-md-3"><label class="form-label small mb-0" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}</div>
+  {% endfor %}
+  <div class="col-12"><button class="btn btn-primary btn-sm">Search</button>
+    <a class="btn btn-link btn-sm" href="{% url 'job_list' %}">Reset</a></div>
+</div></form>
+{% if role == 'worker' %}<p class="small text-muted">"Best match" ranks by simple rules (skills, area, availability, job type), not AI. You can always browse without it.</p>{% endif %}
+{% for j in page %}
+  <div class="card mb-2"><div class="card-body d-flex justify-content-between align-items-start">
+    <div>
+      <a class="fw-semibold" href="{% url 'job_detail' j.pk %}">{{ j.title }}</a>
+      <div class="small text-muted">{{ j.business.business_name }}
+        {% if j.business.is_verified %}<span class="badge text-bg-success">Approved by review</span>{% endif %}
+        · {{ j.area }} · {{ j.get_job_type_display }} · {{ j.pay_display }}</div>
+      <div class="small">{{ j.schedule }}</div>
+      {% if j.match %}<div class="small text-primary">{{ j.match.reasons|join:" · " }}</div>{% endif %}
+    </div>
+    {% if j.match %}<span class="badge text-bg-primary match-badge">{{ j.match.score }}%</span>{% endif %}
+  </div></div>
+{% empty %}<p class="text-muted">No jobs match your filters.</p>{% endfor %}
+{% if page.has_other_pages %}
+<nav><ul class="pagination">
+  {% if page.has_previous %}<li class="page-item"><a class="page-link" href="?{{ querystring }}&page={{ page.previous_page_number }}">Previous</a></li>{% endif %}
+  <li class="page-item disabled"><span class="page-link">{{ page.number }} / {{ page.paginator.num_pages }}</span></li>
+  {% if page.has_next %}<li class="page-item"><a class="page-link" href="?{{ querystring }}&page={{ page.next_page_number }}">Next</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

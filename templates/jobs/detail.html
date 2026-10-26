@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load worklink %}
+{% block title %}{{ job.title }} · WorkLink{% endblock %}
+{% block content %}
+<div class="row"><div class="col-lg-8">
+  <div class="card mb-3"><div class="card-body">
+    <h1 class="h4">{{ job.title }} <span class="badge {{ job.status|badge }}">{{ job.get_status_display }}</span></h1>
+    <p class="text-muted">{{ job.business.business_name }}
+      {% if job.business.is_verified %}<span class="badge text-bg-success">Approved by manual review</span>
+      {% else %}<span class="badge text-bg-secondary">Not yet verified</span>{% endif %}
+      · {{ job.area }}</p>
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Type</dt><dd class="col-sm-9">{{ job.get_job_type_display }}</dd>
+      <dt class="col-sm-3">Pay</dt><dd class="col-sm-9">{{ job.pay_display }}</dd>
+      <dt class="col-sm-3">Schedule</dt><dd class="col-sm-9">{{ job.schedule }}</dd>
+      <dt class="col-sm-3">Vacancies</dt><dd class="col-sm-9">{{ job.vacancies }}</dd>
+      {% if job.closing_at %}<dt class="col-sm-3">Closes</dt><dd class="col-sm-9">{{ job.closing_at }}</dd>{% endif %}
+      {% if job.required_skills %}<dt class="col-sm-3">Skills</dt><dd class="col-sm-9">{{ job.required_skills }}</dd>{% endif %}
+    </dl>
+    <hr><h2 class="h6">About the role</h2><p>{{ job.description|linebreaksbr }}</p>
+    {% if job.duties %}<h2 class="h6">Duties</h2><p>{{ job.duties|linebreaksbr }}</p>{% endif %}
+  </div></div>
+</div>
+<div class="col-lg-4">
+  {% if role == 'worker' %}
+    <div class="card mb-3"><div class="card-body">
+      <div class="mb-2"><span class="badge text-bg-primary">{{ match.score }}% match</span></div>
+      <ul class="small">{% for r in match.reasons %}<li>{{ r }}</li>{% empty %}<li>No specific matches found yet.</li>{% endfor %}</ul>
+      {% if match.incomplete %}<p class="small text-muted">Add {{ match.incomplete|join:", " }} to your profile for a fuller score.</p>{% endif %}
+      {% if existing %}
+        <p>You applied: <span class="badge {{ existing.status|badge }}">{{ existing.get_status_display }}</span></p>
+        <a class="btn btn-outline-primary" href="{% url 'application_detail' existing.pk %}">View application</a>
+      {% elif not job.is_open %}
+        <p class="text-muted">This job is no longer accepting applications.</p>
+      {% elif must_verify %}
+        <div class="alert alert-warning small">Get your profile approved before applying. <a href="{% url 'verification' %}">Submit verification</a></div>
+      {% else %}
+        <form method="post" action="{% url 'apply' job.pk %}">{% csrf_token %}
+          <label class="form-label small" for="id_cover_note">Short note (optional)</label>
+          <textarea name="cover_note" id="id_cover_note" class="form-control mb-2" rows="3" maxlength="1000"></textarea>
+          <p class="small text-muted">Don't include phone numbers. WorkLink arranges contact.</p>
+          <button class="btn btn-primary w-100">Apply</button>
+        </form>
+        <a class="btn btn-sm btn-link w-100" href="{% url 'ai_cover_note' job.pk %}">✨ Help me write the note</a>
+      {% endif %}
+    </div></div>
+  {% elif is_owner %}
+    <a class="btn btn-outline-primary w-100 mb-2" href="{% url 'job_applicants' job.pk %}">View applicants</a>
+    <a class="btn btn-outline-secondary w-100" href="{% url 'job_edit' job.pk %}">Edit</a>
+  {% elif not user.is_authenticated %}
+    <div class="card"><div class="card-body"><a class="btn btn-primary w-100" href="{% url 'login' %}?next={{ request.path }}">Log in to apply</a></div></div>
+  {% endif %}
+</div></div>
+{% endblock %}
